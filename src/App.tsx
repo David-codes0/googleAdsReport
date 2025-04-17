@@ -91,22 +91,39 @@ function App() {
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 5 * 60 * 1000); // 5 minutes timeout
 
-          try {
-            const response = await fetch('https://fifex95197.app.n8n.cloud/webhook/86f0c9fb-b11f-47b7-9da1-c8fd8b96f897', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(webhookData),
-              signal: controller.signal,
-              keepalive: true
-            });
+          // Function to make the fetch request with retries
+          const fetchWithRetry = async (retries = 3, delay = 2000): Promise<Response> => {
+            for (let i = 0; i < retries; i++) {
+              try {
+                const response = await fetch('https://fifex95197.app.n8n.cloud/webhook/86f0c9fb-b11f-47b7-9da1-c8fd8b96f897', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify(webhookData),
+                  signal: controller.signal,
+                  keepalive: true,
+                  mode: 'cors',
+                  credentials: 'omit'
+                });
 
-            clearTimeout(timeoutId);
+                if (!response.ok) {
+                  throw new Error(`Webhook call failed with status: ${response.status}`);
+                }
 
-            if (!response.ok) {
-              throw new Error(`Webhook call failed with status: ${response.status}`);
+                return response;
+              } catch (error) {
+                console.error(`Attempt ${i + 1} failed:`, error);
+                if (i === retries - 1) throw error;
+                await new Promise(resolve => setTimeout(resolve, delay));
+              }
             }
+            throw new Error('All retry attempts failed');
+          };
+
+          try {
+            const response = await fetchWithRetry();
+            clearTimeout(timeoutId);
 
             // Log the raw response text for debugging
             const responseText = await response.text();
@@ -137,9 +154,6 @@ function App() {
             } else {
               alert(`Error generating report: ${error instanceof Error ? error.message : 'Unknown error'}`);
             }
-          } finally {
-            clearTimeout(timeoutId);
-            setIsGenerating(false);
           }
         } catch (error: unknown) {
           console.error('Error in webhook call:', error);
