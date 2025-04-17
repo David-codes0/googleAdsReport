@@ -88,44 +88,62 @@ function App() {
 
           console.log('Sending to webhook:', webhookData);
 
-          const response = await fetch('https://fifex95197.app.n8n.cloud/webhook/86f0c9fb-b11f-47b7-9da1-c8fd8b96f897', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(webhookData)
-          });
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 5 * 60 * 1000); // 5 minutes timeout
 
-          if (!response.ok) {
-            throw new Error(`Webhook call failed with status: ${response.status}`);
-          }
-
-          // Log the raw response text for debugging
-          const responseText = await response.text();
-          console.log('Raw webhook response:', responseText);
-
-          let responseData;
           try {
-            responseData = JSON.parse(responseText);
-          } catch (parseError) {
-            console.error('Error parsing JSON response:', parseError);
-            console.log('Response that could not be parsed:', responseText);
-            throw new Error('Invalid JSON response from webhook');
-          }
+            const response = await fetch('https://fifex95197.app.n8n.cloud/webhook/86f0c9fb-b11f-47b7-9da1-c8fd8b96f897', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(webhookData),
+              signal: controller.signal,
+              keepalive: true
+            });
 
-          console.log('Parsed webhook response:', responseData);
-          setWebhookResponse(responseData);
-          
-          if (selectedGoal === 'cpa') {
-            localStorage.setItem('reportData', JSON.stringify(responseData));
-            window.location.href = '/lead-generation-report';
-          } else {
-            setIsComplete(true);
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+              throw new Error(`Webhook call failed with status: ${response.status}`);
+            }
+
+            // Log the raw response text for debugging
+            const responseText = await response.text();
+            console.log('Raw webhook response:', responseText);
+
+            let responseData;
+            try {
+              responseData = JSON.parse(responseText);
+            } catch (parseError) {
+              console.error('Error parsing JSON response:', parseError);
+              console.log('Response that could not be parsed:', responseText);
+              throw new Error('Invalid JSON response from webhook');
+            }
+
+            console.log('Parsed webhook response:', responseData);
+            setWebhookResponse(responseData);
+            
+            if (selectedGoal === 'cpa') {
+              localStorage.setItem('reportData', JSON.stringify(responseData));
+              window.location.href = '/lead-generation-report';
+            } else {
+              setIsComplete(true);
+            }
+          } catch (error: unknown) {
+            console.error('Error in webhook call:', error);
+            if (error instanceof DOMException && error.name === 'AbortError') {
+              alert('The request took too long to complete. Please try again.');
+            } else {
+              alert(`Error generating report: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            }
+          } finally {
+            clearTimeout(timeoutId);
+            setIsGenerating(false);
           }
         } catch (error: unknown) {
           console.error('Error in webhook call:', error);
           alert(`Error generating report: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        } finally {
           setIsGenerating(false);
         }
       };
