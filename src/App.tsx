@@ -95,7 +95,7 @@ function App() {
           const fetchWithRetry = async (retries = 3, delay = 2000): Promise<Response> => {
             for (let i = 0; i < retries; i++) {
               try {
-                const response = await fetch('https://fifex95197.app.n8n.cloud/webhook/86f0c9fb-b11f-47b7-9da1-c8fd8b96f897', {
+                const response = await fetch('https://hokigat.app.n8n.cloud/webhook/86f0c9fb-b11f-47b7-9da1-c8fd8b96f897', {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json',
