@@ -381,7 +381,9 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
         {/* Visibility & Missed Opportunities */}
         <div className="mb-12">
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">Visibility & Missed Opportunities</h2>
-          <p className="text-gray-600 mb-6">Generic Search missed 36% of available visibility. Some of this is due to limited budget, but ad quality and ranking are also impacting exposure.</p>
+          <p className="text-gray-600 mb-6"> 
+            {reportData.visibility_campaign[0].insight}
+          </p>
           <div className="space-y-6">
             {(reportData.visibility_campaign || []).map((campaign) => (
               <div key={campaign.name} className="bg-white p-6 rounded-xl shadow-sm border">
