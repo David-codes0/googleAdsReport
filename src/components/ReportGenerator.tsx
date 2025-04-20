@@ -154,7 +154,7 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
                 <RefreshCw className="w-4 h-4 text-blue-500" />
               </div>
               <p className="text-sm text-gray-600">
-                This month, your campaigns generated <span className="font-semibold">€{reportData.keyMetrics?.revenueFromAds?.toLocaleString()}</span> in tracked revenue from <span className="font-semibold">€{reportData.keyMetrics?.totalAdSpend?.toLocaleString()}</span> in ad spend. This means you earned <span className="font-semibold">€{reportData.keyMetrics?.roas?.toFixed(2)}</span> for every €1 invested. "Performance Max" and "Brand Search" were your top performing campaigns, delivering the majority of the revenue with strong return efficiency. There's room to grow by increasing investment in these campaigns and optimizing visibility.
+              {reportData.businessSummary}
               </p>
             </div>
 
