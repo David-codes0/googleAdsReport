@@ -547,6 +547,7 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
             </button>
           </div>
         </div>
+        
       </div>
     </div>
   );

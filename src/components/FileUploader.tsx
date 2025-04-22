@@ -100,6 +100,14 @@ export function FileUploader({ selectedGoal, customMetrics = [], onFileChange }:
     onFileChange(null);
   };
 
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = event.target.files?.[0];
+    if (selectedFile?.name.endsWith('.xlsx')) {
+      setFile(selectedFile);
+      onFileChange(selectedFile);
+    }
+  };
+
   const getRequiredColumns = () => {
     if (selectedGoal === 'custom') {
       return ['Date', 'Campaign Name', ...customMetrics.map(id => metricIdToLabel[id] || id)];
@@ -161,9 +169,15 @@ export function FileUploader({ selectedGoal, customMetrics = [], onFileChange }:
             <div>
               <p className="text-gray-600">
                 Drag and drop your Excel file here, or{' '}
-                <button className="text-indigo-600 font-medium hover:text-indigo-700">
+                <label className="text-indigo-600 font-medium hover:text-indigo-700 cursor-pointer">
                   browse
-                </button>
+                  <input
+                    type="file"
+                    accept=".xlsx"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                </label>
               </p>
               <p className="text-sm text-gray-500 mt-2">
                 Accepts .xlsx files only
