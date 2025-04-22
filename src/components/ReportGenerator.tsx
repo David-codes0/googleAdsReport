@@ -146,44 +146,49 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
     const element = document.getElementById('report-content');
     if (!element) return;
 
-    // Temporarily hide the buttons section
-    const buttonsSection = document.querySelector('.pdf-exclude');
-    if (buttonsSection) {
-      buttonsSection.classList.add('hidden');
-    }
-
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-
-    const totalHeight = element.offsetHeight;
-    const totalWidth = element.offsetWidth;
-    const scale = pageWidth / totalWidth;
-    const pageCount = Math.ceil(totalHeight * scale / pageHeight);
-
     try {
-      for (let i = 0; i < pageCount; i++) {
-        const canvas = await html2canvas(element, {
-          scale: 2,
-          logging: false,
-          useCORS: true,
-          windowHeight: totalHeight,
-          y: i * (pageHeight / scale),
-          height: pageHeight / scale
-        });
-
-        const imgData = canvas.toDataURL('image/png');
-        if (i > 0) {
-          pdf.addPage();
-        }
-        pdf.addImage(imgData, 'PNG', 0, 0, pageWidth, pageHeight);
+      // Hide the buttons before generating PDF
+      const buttonsContainer = document.querySelector('.pdf-exclude') as HTMLDivElement;
+      if (buttonsContainer) {
+        buttonsContainer.style.display = 'none';
       }
 
-      pdf.save('google-ads-report.pdf');
-    } finally {
-      // Restore the visibility of the buttons section
-      if (buttonsSection) {
-        buttonsSection.classList.remove('hidden');
+      // @ts-ignore
+      const html2pdf = (await import('html2pdf.js')).default;
+      const opt = {
+        margin: 0,
+        filename: 'google-ads-report.pdf',
+        image: { type: 'jpeg', quality: 1 },
+        html2canvas: { 
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          windowWidth: 1200,
+          windowHeight: element.scrollHeight,
+          backgroundColor: '#ffffff'
+        },
+        jsPDF: { 
+          unit: 'px', 
+          format: [1200, element.scrollHeight],
+          orientation: 'portrait',
+          compress: true,
+          hotfixes: ['px_scaling']
+        }
+      };
+
+      await html2pdf().set(opt).from(element).save();
+
+      // Show the buttons again after PDF generation
+      if (buttonsContainer) {
+        buttonsContainer.style.display = 'flex';
+      }
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Failed to generate PDF. Please try again.');
+      // Ensure buttons are visible even if PDF generation fails
+      const buttonsContainer = document.querySelector('.pdf-exclude') as HTMLDivElement;
+      if (buttonsContainer) {
+        buttonsContainer.style.display = 'flex';
       }
     }
   };
