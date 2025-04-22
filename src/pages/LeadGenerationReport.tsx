@@ -17,6 +17,7 @@ import {
 
 interface WebhookResponse {
   output: {
+    language: string;
     businessSummary: {
       dateRange: string;
       summary: string;
@@ -92,6 +93,48 @@ export function LeadGenerationReport() {
 
   const reportData = JSON.parse(localStorage.getItem('reportData') || '{}') as WebhookResponse;
   const data = reportData.output;
+  const isFrench = data.language === 'fr';
+
+  const translations = {
+    title: isFrench ? 'Rapport de Génération de Leads Google Ads' : 'Google Ads Lead Generation Report',
+    dateRange: isFrench ? 'Période du rapport' : 'Report Date Range',
+    subtitle: isFrench ? 'Comment votre budget publicitaire a généré des demandes commerciales réelles' : 'How your ad budget turned into real business inquiries',
+    executiveSummary: isFrench ? 'Résumé Exécutif' : 'Executive Summary',
+    businessImplications: isFrench ? 'Ce que cela signifie pour votre entreprise :' : 'What This Means for Your Business:',
+    metrics: {
+      totalAdSpend: isFrench ? 'Dépenses publicitaires totales' : 'Total Ad Spend',
+      totalBudgetUsed: isFrench ? 'Budget total utilisé ce mois-ci' : 'Total budget used this month',
+      leadsGenerated: isFrench ? 'Leads générés' : 'Leads Generated',
+      contactForms: isFrench ? 'Formulaires de contact, appels ou inscriptions' : 'Contact forms, calls, or signups',
+      costPerLead: isFrench ? 'Coût par lead' : 'Cost per Lead',
+      costPerLeadDesc: isFrench ? 'Coût de chaque lead' : 'How much each lead cost you',
+      websiteVisitors: isFrench ? 'Visiteurs du site' : 'Website Visitors',
+      totalClicks: isFrench ? 'Total des clics depuis vos annonces' : 'Total clicks from your ads',
+      costPerVisitor: isFrench ? 'Coût par visiteur' : 'Cost per Visitor',
+      avgCostPerVisitor: isFrench ? 'Coût moyen par visiteur du site' : 'Avg. cost per site visitor',
+      siteLeadRate: isFrench ? 'Taux de conversion en leads' : 'Site Lead Rate',
+      conversionRate: isFrench ? '% de visiteurs devenus leads' : '% of visitors who became leads'
+    },
+    charts: {
+      leadsVsSpend: isFrench ? 'Leads vs Dépenses dans le temps' : 'Leads vs Spend Over Time',
+      leadsVsSpendDesc: isFrench ? 'Montre comment votre budget publicitaire quotidien a généré des leads' : 'Shows how your daily ad budget turned into leads',
+      costPerLeadTrend: isFrench ? 'Tendance du coût par lead' : 'Cost per Lead Trend',
+      costPerLeadTrendDesc: isFrench ? 'Montre comment l\'efficacité des leads a évolué ce mois-ci' : 'Shows how lead efficiency changed this month',
+      clickPerformance: isFrench ? 'Performance des clics' : 'Click Performance',
+      clickPerformanceDesc: isFrench ? 'Montre les clics quotidiens et le taux d\'engagement' : 'Shows daily clicks and engagement rate'
+    },
+    campaignPerformance: isFrench ? 'Performance des campagnes' : 'Campaign Performance',
+    visibilityBreakdown: isFrench ? 'Répartition de la visibilité' : 'Visibility Breakdown',
+    actionItems: {
+      keepDoing: isFrench ? 'Continuer à faire' : 'Keep Doing',
+      fixOrReview: isFrench ? 'Corriger ou examiner' : 'Fix or Review',
+      testOrExplore: isFrench ? 'Tester ou explorer' : 'Test or Explore'
+    },
+    buttons: {
+      generateAnother: isFrench ? 'Générer un autre rapport' : 'Generate Another Report',
+      downloadPDF: isFrench ? 'Télécharger PDF' : 'Download PDF'
+    }
+  };
 
   const handleDownloadPDF = useCallback(async () => {
     const element = document.getElementById('report-content');
@@ -159,9 +202,9 @@ export function LeadGenerationReport() {
           {/* Title Section */}
           <div className="bg-[#2563EB] pt-16 pb-32 px-4 rounded-t-lg">
             <div className="max-w-7xl mx-auto text-center text-white">
-              <h1 className="text-4xl font-bold mb-2">Google Ads Lead Generation Report</h1>
+              <h1 className="text-4xl font-bold mb-2">{translations.title}</h1>
               <p className="text-xl mb-2">{data.businessSummary.dateRange}</p>
-              <p className="text-lg">How your ad budget turned into real business inquiries</p>
+              <p className="text-lg">{translations.subtitle}</p>
             </div>
           </div>
 
@@ -169,11 +212,11 @@ export function LeadGenerationReport() {
           <div className="bg-white rounded-lg shadow-lg p-8 -mt-24">
             {/* Executive Summary */}
             <div className="mb-12">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Executive Summary</h2>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">{translations.executiveSummary}</h2>
               <p className="text-gray-700 mb-8">{data.businessSummary.summary}</p>
 
               <div className="mb-8">
-                <h3 className="text-lg font-medium text-gray-900 mb-3">What This Means for Your Business:</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-3">{translations.businessImplications}</h3>
                 <ul className="space-y-3">
                   {data.businessSummary.businessImplications.map((implication, index) => (
                     <li key={index} className="flex items-center text-gray-600">
@@ -192,60 +235,60 @@ export function LeadGenerationReport() {
                 <div className="bg-gray-50 p-6 rounded-lg">
                   <div className="flex items-center mb-2">
                     <DollarSign className="w-5 h-5 text-gray-600 mr-2" />
-                    <p className="text-sm text-gray-600">Total Ad Spend</p>
+                    <p className="text-sm text-gray-600">{translations.metrics.totalAdSpend}</p>
                   </div>
                   <p className="text-2xl font-semibold text-gray-900">€{data.reportMetrics.totalAdSpend.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
-                  <p className="text-xs text-gray-500">Total budget used this month</p>
+                  <p className="text-xs text-gray-500">{translations.metrics.totalBudgetUsed}</p>
                 </div>
 
                 {/* Leads Generated */}
                 <div className="bg-gray-50 p-6 rounded-lg">
                   <div className="flex items-center mb-2">
                     <Users className="w-5 h-5 text-gray-600 mr-2" />
-                    <p className="text-sm text-gray-600">Leads Generated</p>
+                    <p className="text-sm text-gray-600">{translations.metrics.leadsGenerated}</p>
                   </div>
                   <p className="text-2xl font-semibold text-gray-900">{Math.round(data.reportMetrics.leadsGenerated).toLocaleString()}</p>
-                  <p className="text-xs text-gray-500">Contact forms, calls, or signups</p>
+                  <p className="text-xs text-gray-500">{translations.metrics.contactForms}</p>
                 </div>
 
                 {/* Cost per Lead */}
                 <div className="bg-gray-50 p-6 rounded-lg">
                   <div className="flex items-center mb-2">
                     <TrendingUp className="w-5 h-5 text-gray-600 mr-2" />
-                    <p className="text-sm text-gray-600">Cost per Lead</p>
+                    <p className="text-sm text-gray-600">{translations.metrics.costPerLead}</p>
                   </div>
                   <p className="text-2xl font-semibold text-gray-900">€{data.reportMetrics.costPerLead.toFixed(2)}</p>
-                  <p className="text-xs text-gray-500">How much each lead cost you</p>
+                  <p className="text-xs text-gray-500">{translations.metrics.costPerLeadDesc}</p>
                 </div>
 
                 {/* Website Visitors */}
                 <div className="bg-gray-50 p-6 rounded-lg">
                   <div className="flex items-center mb-2">
                     <MousePointerClick className="w-5 h-5 text-gray-600 mr-2" />
-                    <p className="text-sm text-gray-600">Website Visitors</p>
+                    <p className="text-sm text-gray-600">{translations.metrics.websiteVisitors}</p>
                   </div>
                   <p className="text-2xl font-semibold text-gray-900">{data.reportMetrics.websiteVisitors.toLocaleString()}</p>
-                  <p className="text-xs text-gray-500">Total clicks from your ads</p>
+                  <p className="text-xs text-gray-500">{translations.metrics.totalClicks}</p>
                 </div>
 
                 {/* Cost per Visitor */}
                 <div className="bg-gray-50 p-6 rounded-lg">
                   <div className="flex items-center mb-2">
                     <DollarSign className="w-5 h-5 text-gray-600 mr-2" />
-                    <p className="text-sm text-gray-600">Cost per Visitor</p>
+                    <p className="text-sm text-gray-600">{translations.metrics.costPerVisitor}</p>
                   </div>
                   <p className="text-2xl font-semibold text-gray-900">€{data.reportMetrics.costPerVisitor.toFixed(2)}</p>
-                  <p className="text-xs text-gray-500">Avg. cost per site visitor</p>
+                  <p className="text-xs text-gray-500">{translations.metrics.avgCostPerVisitor}</p>
                 </div>
 
                 {/* Site Lead Rate */}
                 <div className="bg-gray-50 p-6 rounded-lg">
                   <div className="flex items-center mb-2">
                     <Percent className="w-5 h-5 text-gray-600 mr-2" />
-                    <p className="text-sm text-gray-600">Site Lead Rate</p>
+                    <p className="text-sm text-gray-600">{translations.metrics.siteLeadRate}</p>
                   </div>
                   <p className="text-2xl font-semibold text-gray-900">{data.reportMetrics.siteLeadRate.toFixed(2)}%</p>
-                  <p className="text-xs text-gray-500">% of visitors who became leads</p>
+                  <p className="text-xs text-gray-500">{translations.metrics.conversionRate}</p>
                 </div>
               </div>
             </div>
@@ -255,8 +298,8 @@ export function LeadGenerationReport() {
               <div className="grid grid-cols-1 gap-8">
                 {/* Leads vs Spend Chart */}
                 <div className="bg-white p-6 rounded-xl shadow-sm border">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1">Leads vs Spend Over Time</h3>
-                  <p className="text-sm text-gray-600 mb-4">Shows how your daily ad budget turned into leads</p>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-1">{translations.charts.leadsVsSpend}</h3>
+                  <p className="text-sm text-gray-600 mb-4">{translations.charts.leadsVsSpendDesc}</p>
                   <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={data.visualizations.dailyData} barGap={0}>
@@ -289,6 +332,7 @@ export function LeadGenerationReport() {
                           fill="#4F46E5" 
                           radius={[4, 4, 0, 0]}
                           maxBarSize={40}
+                          name={isFrench ? "Leads" : "Leads"}
                         />
                         <Bar 
                           yAxisId="right" 
@@ -296,6 +340,7 @@ export function LeadGenerationReport() {
                           fill="#93C5FD" 
                           radius={[4, 4, 0, 0]}
                           maxBarSize={40}
+                          name={isFrench ? "Dépenses" : "Spend"}
                         />
                         <Legend />
                       </BarChart>
@@ -305,8 +350,8 @@ export function LeadGenerationReport() {
 
                 {/* Cost per Lead Trend */}
                 <div className="bg-white p-6 rounded-xl shadow-sm border">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1">Cost per Lead Trend</h3>
-                  <p className="text-sm text-gray-600 mb-4">Shows how lead efficiency changed this month</p>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-1">{translations.charts.costPerLeadTrend}</h3>
+                  <p className="text-sm text-gray-600 mb-4">{translations.charts.costPerLeadTrendDesc}</p>
                   <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={data.visualizations.costPerLeadData}>
@@ -330,7 +375,7 @@ export function LeadGenerationReport() {
                                 <div className="bg-white p-2 border rounded shadow-sm">
                                   <p className="text-sm">{payload[0].payload.date}</p>
                                   <p className="text-sm text-blue-600">
-                                    Cost per Lead (€): {payload[0].value.toFixed(2)}
+                                    {isFrench ? "Coût par Lead (€)" : "Cost per Lead (€)"}: {payload[0].value.toFixed(2)}
                                   </p>
                                 </div>
                               );
@@ -345,6 +390,7 @@ export function LeadGenerationReport() {
                           strokeWidth={2}
                           fill="none"
                           dot={{ fill: '#4F46E5', r: 4 }}
+                          name={isFrench ? "Coût par Lead" : "Cost per Lead"}
                         />
                       </AreaChart>
                     </ResponsiveContainer>
@@ -353,8 +399,8 @@ export function LeadGenerationReport() {
 
                 {/* Click Performance */}
                 <div className="bg-white p-6 rounded-xl shadow-sm border">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1">Click Performance</h3>
-                  <p className="text-sm text-gray-600 mb-4">Shows daily clicks and engagement rate</p>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-1">{translations.charts.clickPerformance}</h3>
+                  <p className="text-sm text-gray-600 mb-4">{translations.charts.clickPerformanceDesc}</p>
                   <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={data.visualizations.clickData}>
@@ -377,6 +423,7 @@ export function LeadGenerationReport() {
                           stroke="#4F46E5"
                           fill="#93C5FD"
                           fillOpacity={0.3}
+                          name={isFrench ? "Clics" : "Clicks"}
                         />
                         <Legend />
                       </AreaChart>
@@ -388,17 +435,17 @@ export function LeadGenerationReport() {
 
             {/* Campaign Performance */}
             <div className="mb-12">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-6">Campaign Performance</h2>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-6">{translations.campaignPerformance}</h2>
               <div className="overflow-x-auto">
                 <table className="min-w-full">
                   <thead>
                     <tr className="border-b border-gray-200">
-                      <th className="text-left text-sm text-gray-500 font-normal pb-4">CAMPAIGN</th>
-                      <th className="text-left text-sm text-gray-500 font-normal pb-4">SPEND</th>
-                      <th className="text-left text-sm text-gray-500 font-normal pb-4">LEADS</th>
-                      <th className="text-left text-sm text-gray-500 font-normal pb-4">COST PER LEAD</th>
-                      <th className="text-left text-sm text-gray-500 font-normal pb-4">CLICKS</th>
-                      <th className="text-left text-sm text-gray-500 font-normal pb-4">SITE LEAD RATE</th>
+                      <th className="text-left text-sm text-gray-500 font-normal pb-4">{isFrench ? "CAMPAGNE" : "CAMPAIGN"}</th>
+                      <th className="text-left text-sm text-gray-500 font-normal pb-4">{isFrench ? "DÉPENSES" : "SPEND"}</th>
+                      <th className="text-left text-sm text-gray-500 font-normal pb-4">{isFrench ? "LEADS" : "LEADS"}</th>
+                      <th className="text-left text-sm text-gray-500 font-normal pb-4">{isFrench ? "COÛT PAR LEAD" : "COST PER LEAD"}</th>
+                      <th className="text-left text-sm text-gray-500 font-normal pb-4">{isFrench ? "CLICS" : "CLICKS"}</th>
+                      <th className="text-left text-sm text-gray-500 font-normal pb-4">{isFrench ? "TAUX DE CONVERSION" : "SITE LEAD RATE"}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
@@ -406,14 +453,14 @@ export function LeadGenerationReport() {
                       <tr key={index} className="group hover:bg-gray-50">
                         <td className="py-4">
                           <div className="flex items-center">
-                            <span className="text-gray-900 font-medium">{campaign?.campaignName || 'Unnamed Campaign'}</span>
+                            <span className="text-gray-900 font-medium">{campaign?.campaignName || (isFrench ? 'Campagne sans nom' : 'Unnamed Campaign')}</span>
                             <span className={`ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
                               campaign?.performance === 'Green' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                             }`}>
-                              {campaign?.performance === 'Green' ? 'Excellent' : 'Warning'}
+                              {campaign?.performance === 'Green' ? (isFrench ? 'Excellent' : 'Excellent') : (isFrench ? 'Attention' : 'Warning')}
                             </span>
                           </div>
-                          <p className="text-sm text-gray-500 mt-1">{campaign?.insight || 'No insight available'}</p>
+                          <p className="text-sm text-gray-500 mt-1">{campaign?.insight || (isFrench ? 'Aucune analyse disponible' : 'No insight available')}</p>
                         </td>
                         <td className="py-4 text-gray-900">€{(campaign?.spend || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
                         <td className="py-4 text-gray-900">{Math.round(campaign?.leads || 0).toLocaleString()}</td>
@@ -429,7 +476,7 @@ export function LeadGenerationReport() {
 
             {/* Visibility Breakdown */}
             <div className="mb-12">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-6">Visibility Breakdown</h2>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-6">{translations.visibilityBreakdown}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {data.visibility.campaigns.map((campaign, index) => (
                   <div key={index} className="bg-gray-50 p-6 rounded-lg">
@@ -437,7 +484,7 @@ export function LeadGenerationReport() {
                     <div className="space-y-4">
                       <div>
                         <div className="flex justify-between text-sm mb-1">
-                          <span className="text-gray-600">Reach Captured</span>
+                          <span className="text-gray-600">{isFrench ? "Portée capturée" : "Reach Captured"}</span>
                           <span className="text-gray-900">{campaign.reachCaptured.toFixed(1)}%</span>
                         </div>
                         <div className="h-2 bg-gray-200 rounded-full">
@@ -449,7 +496,7 @@ export function LeadGenerationReport() {
                       </div>
                       <div>
                         <div className="flex justify-between text-sm mb-1">
-                          <span className="text-gray-600">Missed (Budget)</span>
+                          <span className="text-gray-600">{isFrench ? "Manqué (Budget)" : "Missed (Budget)"}</span>
                           <span className="text-gray-900">{campaign.reachMissedBudget.toFixed(1)}%</span>
                         </div>
                         <div className="h-2 bg-gray-200 rounded-full">
@@ -461,7 +508,7 @@ export function LeadGenerationReport() {
                       </div>
                       <div>
                         <div className="flex justify-between text-sm mb-1">
-                          <span className="text-gray-600">Missed (Ranking)</span>
+                          <span className="text-gray-600">{isFrench ? "Manqué (Classement)" : "Missed (Ranking)"}</span>
                           <span className="text-gray-900">{campaign.reachMissedRanking.toFixed(1)}%</span>
                         </div>
                         <div className="h-2 bg-gray-200 rounded-full">
@@ -482,7 +529,7 @@ export function LeadGenerationReport() {
                 <div className="bg-white p-6 rounded-lg border border-green-200">
                   <div className="flex items-center mb-4">
                     <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
-                    <h3 className="text-lg font-medium text-gray-900">Keep Doing</h3>
+                    <h3 className="text-lg font-medium text-gray-900">{translations.actionItems.keepDoing}</h3>
                   </div>
                   <ul className="space-y-2">
                     {data.strategicRecommendations.keepDoing.map((item, index) => (
@@ -495,7 +542,7 @@ export function LeadGenerationReport() {
                 <div className="bg-white p-6 rounded-lg border border-yellow-200">
                   <div className="flex items-center mb-4">
                     <AlertTriangle className="w-5 h-5 text-yellow-600 mr-2" />
-                    <h3 className="text-lg font-medium text-gray-900">Fix or Review</h3>
+                    <h3 className="text-lg font-medium text-gray-900">{translations.actionItems.fixOrReview}</h3>
                   </div>
                   <ul className="space-y-2">
                     {data.strategicRecommendations.fixOrReview.map((item, index) => (
@@ -508,7 +555,7 @@ export function LeadGenerationReport() {
                 <div className="bg-white p-6 rounded-lg border border-blue-200">
                   <div className="flex items-center mb-4">
                     <ArrowUpRight className="w-5 h-5 text-blue-600 mr-2" />
-                    <h3 className="text-lg font-medium text-gray-900">Test or Explore</h3>
+                    <h3 className="text-lg font-medium text-gray-900">{translations.actionItems.testOrExplore}</h3>
                   </div>
                   <ul className="space-y-2">
                     {data.strategicRecommendations.testOrExplore.map((item, index) => (
@@ -527,14 +574,14 @@ export function LeadGenerationReport() {
             onClick={() => window.location.href = '/'}
             className="bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 transition-colors"
           >
-            Generate Another Report
+            {translations.buttons.generateAnother}
           </button>
           <button 
             onClick={handleDownloadPDF}
             className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center"
           >
             <Download className="w-5 h-5 mr-2" />
-            Download PDF
+            {translations.buttons.downloadPDF}
           </button>
         </div>
       </div>

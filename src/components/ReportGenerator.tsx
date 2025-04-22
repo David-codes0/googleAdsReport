@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 
 interface ReportData {
+  language: string;
   dateRange: string;
   keyMetrics: {
     totalAdSpend: number;
@@ -83,6 +84,63 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
   }
 
   const reportData = data.output;
+  const isFrench = reportData.language === 'fr';
+
+  const translations = {
+    title: isFrench ? 'Rapport de Performance des Revenus Google Ads' : 'Google Ads Revenue Performance Report',
+    subtitle: isFrench ? 'Comment votre investissement publicitaire a performé' : 'How your ad investment performed',
+    preparedBy: isFrench ? 'Préparé par Digital Growth Agency' : 'Prepared by Digital Growth Agency',
+    quote: isFrench ? 'Examinons ce que vos dépenses publicitaires ont rapporté ce mois-ci.' : 'Let\'s take a look at what your ad spend delivered this month.',
+    executiveSummary: isFrench ? 'Résumé Exécutif' : 'Executive Summary',
+    metrics: {
+      totalInvestment: isFrench ? 'INVESTISSEMENT TOTAL CE MOIS' : 'TOTAL INVESTMENT THIS MONTH',
+      revenueGenerated: isFrench ? 'REVENU GÉNÉRÉ PAR LES PUBLICITÉS' : 'REVENUE GENERATED FROM ADS',
+      returnOnAdSpend: isFrench ? 'RETOUR SUR INVESTISSEMENT PUBLICITAIRE' : 'RETURN ON AD SPEND',
+      averageEngagement: isFrench ? 'TAUX D\'ENGAGEMENT MOYEN' : 'AVERAGE ENGAGEMENT RATE',
+      averageCostPerClick: isFrench ? 'COÛT MOYEN PAR CLIC' : 'AVERAGE COST PER CLICK'
+    },
+    visualDashboard: isFrench ? 'Tableau de Bord Visuel de Performance' : 'Visual Performance Dashboard',
+    charts: {
+      revenueVsSpend: {
+        title: isFrench ? 'Revenu vs Dépenses par Jour' : 'Revenue vs Spend by Day',
+        description: isFrench ? 'Montre votre retour quotidien—vue claire de la chronologie de génération de profit.' : 'Shows your daily return—clear view of profit generation timeline.'
+      },
+      adReturn: {
+        title: isFrench ? 'Retour Publicitaire au Fil du Temps (ROAS)' : 'Ad Return Over Time (ROAS)',
+        description: isFrench ? 'Combien d\'euros ont été gagnés par €1 dépensé chaque jour.' : 'How many euros were earned per €1 spent each day.'
+      },
+      clickPerformance: {
+        title: isFrench ? 'Tendance de Performance des Clics' : 'Click Performance Trend',
+        description: isFrench ? 'Visualisation de l\'engagement (clics + taux) au fil du temps.' : 'Visualizing engagement (clicks + rate) over time.'
+      },
+      revenueDistribution: {
+        title: isFrench ? 'Distribution des Revenus' : 'Revenue Distribution',
+        description: isFrench ? 'Quelle part des revenus provient de chaque campagne.' : 'What share of revenue came from each campaign.'
+      }
+    },
+    campaignPerformance: isFrench ? 'Performance des Campagnes' : 'Campaign Performance',
+    visibilityOpportunities: isFrench ? 'Visibilité & Opportunités Manquées' : 'Visibility & Missed Opportunities',
+    totalPotentialReach: isFrench ? 'Portée Potentielle Totale' : 'Total Potential Reach',
+    visibility: {
+      captured: isFrench ? 'Capturé' : 'Captured',
+      budgetLimited: isFrench ? 'Limité par Budget' : 'Budget Limited',
+      rankingLimited: isFrench ? 'Limité par Classement' : 'Ranking Limited'
+    },
+    performanceSummary: isFrench ? 'Résumé de Performance' : 'Performance Summary',
+    noPerformanceSummary: isFrench ? 'Aucun résumé de performance disponible' : 'No performance summary available',
+    strategicActionPlan: isFrench ? 'Plan d\'Action Stratégique' : 'Strategic Action Plan',
+    actionItems: {
+      whatsWorking: isFrench ? 'Ce qui Fonctionne' : 'What\'s Working',
+      needsReview: isFrench ? 'Ce qui Nécessite un Examen' : 'What Needs Review',
+      nextSteps: isFrench ? 'Prochaines Étapes' : 'Next Steps'
+    },
+    increaseRevenue: isFrench ? 'Voulez-vous augmenter les revenus le mois prochain ?' : 'Want to increase revenue next month?',
+    buttons: {
+      bookStrategy: isFrench ? 'Réserver une Session Stratégique' : 'Book Strategy Session',
+      downloadPDF: isFrench ? 'Télécharger en PDF' : 'Download as PDF',
+      generateAnother: isFrench ? 'Générer un Autre Rapport' : 'Generate Another Report'
+    }
+  };
 
   const generatePDF = async () => {
     const element = document.getElementById('report-content');
@@ -138,15 +196,15 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
           <div className="flex justify-center mb-4">
             <BarChart3 className="w-8 h-8 text-indigo-600" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Google Ads Revenue Performance Report</h1>
-          <p className="text-gray-600 mb-1">How your ad investment performed - {reportData.dateRange}</p>
-          <p className="text-gray-400 text-sm mb-2">Prepared by Digital Growth Agency</p>
-          <p className="text-gray-500 italic">"Let's take a look at what your ad spend delivered this month."</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{translations.title}</h1>
+          <p className="text-gray-600 mb-1">{translations.subtitle} - {reportData.dateRange}</p>
+          <p className="text-gray-400 text-sm mb-2">{translations.preparedBy}</p>
+          <p className="text-gray-500 italic">{translations.quote}</p>
         </div>
 
         {/* Executive Summary */}
         <div className="mb-12">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Executive Summary</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">{translations.executiveSummary}</h2>
           
           <div className="bg-gray-50 rounded-lg p-6">
             <div className="flex items-start gap-2 mb-6">
@@ -154,7 +212,7 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
                 <RefreshCw className="w-4 h-4 text-blue-500" />
               </div>
               <p className="text-sm text-gray-600">
-              {reportData.businessSummary}
+                {reportData.businessSummary}
               </p>
             </div>
 
@@ -164,7 +222,7 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
                   <DollarSign className="w-5 h-5 text-gray-400 mx-auto" />
                 </div>
                 <p className="text-2xl font-semibold text-gray-900">€{reportData.keyMetrics?.totalAdSpend?.toLocaleString()}</p>
-                <p className="text-xs text-gray-500 mt-1">TOTAL INVESTMENT THIS MONTH</p>
+                <p className="text-xs text-gray-500 mt-1">{translations.metrics.totalInvestment}</p>
               </div>
 
               <div className="text-center">
@@ -172,7 +230,7 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
                   <DollarSign className="w-5 h-5 text-gray-400 mx-auto" />
                 </div>
                 <p className="text-2xl font-semibold text-gray-900">€{reportData.keyMetrics?.revenueFromAds?.toLocaleString()}</p>
-                <p className="text-xs text-gray-500 mt-1">REVENUE GENERATED FROM ADS</p>
+                <p className="text-xs text-gray-500 mt-1">{translations.metrics.revenueGenerated}</p>
               </div>
 
               <div className="text-center">
@@ -180,7 +238,7 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
                   <TrendingUp className="w-5 h-5 text-gray-400 mx-auto" />
                 </div>
                 <p className="text-2xl font-semibold text-gray-900">{reportData.keyMetrics?.roas?.toFixed(2)}x</p>
-                <p className="text-xs text-gray-500 mt-1">RETURN ON AD SPEND</p>
+                <p className="text-xs text-gray-500 mt-1">{translations.metrics.returnOnAdSpend}</p>
               </div>
 
               <div className="text-center">
@@ -188,7 +246,7 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
                   <Percent className="w-5 h-5 text-gray-400 mx-auto" />
                 </div>
                 <p className="text-2xl font-semibold text-gray-900">{(reportData.keyMetrics?.adEngagementRate * 100)?.toFixed(2)}%</p>
-                <p className="text-xs text-gray-500 mt-1">AVERAGE ENGAGEMENT RATE</p>
+                <p className="text-xs text-gray-500 mt-1">{translations.metrics.averageEngagement}</p>
               </div>
 
               <div className="text-center">
@@ -196,7 +254,7 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
                   <MousePointerClick className="w-5 h-5 text-gray-400 mx-auto" />
                 </div>
                 <p className="text-2xl font-semibold text-gray-900">€{reportData.keyMetrics?.costPerVisitor?.toFixed(2)}</p>
-                <p className="text-xs text-gray-500 mt-1">AVERAGE COST PER CLICK</p>
+                <p className="text-xs text-gray-500 mt-1">{translations.metrics.averageCostPerClick}</p>
               </div>
             </div>
           </div>
@@ -204,12 +262,12 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
 
         {/* Visual Performance Dashboard */}
         <div className="pdf-page-break mb-12">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-6">Visual Performance Dashboard</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-6">{translations.visualDashboard}</h2>
           <div className="grid grid-cols-2 gap-8">
             {/* Revenue vs Spend Chart */}
             <div className="bg-white p-6 rounded-xl shadow-sm border">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Revenue vs Spend by Day</h3>
-              <p className="text-sm text-gray-600 mb-4">Shows your daily return—clear view of profit generation timeline.</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">{translations.charts.revenueVsSpend.title}</h3>
+              <p className="text-sm text-gray-600 mb-4">{translations.charts.revenueVsSpend.description}</p>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={reportData.dailyTrends}>
@@ -221,12 +279,12 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
                     <Bar
                       dataKey="revenue"
                       fill="#4F46E5"
-                      name="Revenue"
+                      name={isFrench ? "Revenu" : "Revenue"}
                     />
                     <Bar
                       dataKey="spend"
                       fill="#60A5FA"
-                      name="Spend"
+                      name={isFrench ? "Dépenses" : "Spend"}
                     />
                   </BarChart>
                 </ResponsiveContainer>
@@ -235,8 +293,8 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
 
             {/* ROAS Chart */}
             <div className="bg-white p-6 rounded-xl shadow-sm border">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Ad Return Over Time (ROAS)</h3>
-              <p className="text-sm text-gray-600 mb-4">How many euros were earned per €1 spent each day.</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">{translations.charts.adReturn.title}</h3>
+              <p className="text-sm text-gray-600 mb-4">{translations.charts.adReturn.description}</p>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={reportData.dailyTrends}>
@@ -250,7 +308,7 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
                       stroke="#4F46E5"
                       fill="#4F46E5"
                       fillOpacity={0.1}
-                      name="ROAS"
+                      name={isFrench ? "ROAS" : "ROAS"}
                     />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -259,8 +317,8 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
 
             {/* Click Performance Chart */}
             <div className="bg-white p-6 rounded-xl shadow-sm border">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Click Performance Trend</h3>
-              <p className="text-sm text-gray-600 mb-4">Visualizing engagement (clicks + rate) over time.</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">{translations.charts.clickPerformance.title}</h3>
+              <p className="text-sm text-gray-600 mb-4">{translations.charts.clickPerformance.description}</p>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={reportData.dailyTrends}>
@@ -277,7 +335,7 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
                       stroke="#4F46E5"
                       fill="#4F46E5"
                       fillOpacity={0.1}
-                      name="Clicks"
+                      name={isFrench ? "Clics" : "Clicks"}
                     />
                     <Area
                       yAxisId="right"
@@ -286,7 +344,7 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
                       stroke="#60A5FA"
                       fill="#60A5FA"
                       fillOpacity={0.1}
-                      name="Engagement Rate %"
+                      name={isFrench ? "Taux d'Engagement %" : "Engagement Rate %"}
                     />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -295,8 +353,8 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
 
             {/* Revenue Distribution Chart */}
             <div className="bg-white p-6 rounded-xl shadow-sm border">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Revenue Distribution</h3>
-              <p className="text-sm text-gray-600 mb-4">What share of revenue came from each campaign.</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">{translations.charts.revenueDistribution.title}</h3>
+              <p className="text-sm text-gray-600 mb-4">{translations.charts.revenueDistribution.description}</p>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -341,7 +399,7 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
 
         {/* Campaign Performance */}
         <div className="mb-12">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">Campaign Performance</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4">{translations.campaignPerformance}</h2>
           <div className="space-y-6">
             {(reportData.campaigns || []).map((campaign) => (
               <div key={campaign.name} className="bg-white p-6 rounded-xl shadow-sm border">
@@ -349,27 +407,27 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
                 <p className="text-sm text-gray-600 mb-4">{campaign.insight}</p>
                 <div className="grid grid-cols-6 gap-4">
                   <div>
-                    <p className="text-xs text-gray-500">Spend</p>
+                    <p className="text-xs text-gray-500">{isFrench ? "Dépenses" : "Spend"}</p>
                     <p className="text-sm font-medium">€{campaign.spend.toLocaleString()}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">Revenue</p>
+                    <p className="text-xs text-gray-500">{isFrench ? "Revenu" : "Revenue"}</p>
                     <p className="text-sm font-medium">€{campaign.revenue.toLocaleString()}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">€ per €</p>
+                    <p className="text-xs text-gray-500">{isFrench ? "€ par €" : "€ per €"}</p>
                     <p className="text-sm font-medium">{campaign.roas.toFixed(2)}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">Clicks</p>
+                    <p className="text-xs text-gray-500">{isFrench ? "Clics" : "Clicks"}</p>
                     <p className="text-sm font-medium">{campaign.clicks.toLocaleString()}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">Cost/Visitor</p>
+                    <p className="text-xs text-gray-500">{isFrench ? "Coût/Visiteur" : "Cost/Visitor"}</p>
                     <p className="text-sm font-medium">€{campaign.costPerVisitor.toFixed(2)}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">Engagement</p>
+                    <p className="text-xs text-gray-500">{isFrench ? "Engagement" : "Engagement"}</p>
                     <p className="text-sm font-medium">{campaign.engagementRate.toFixed(2)}%</p>
                   </div>
                 </div>
@@ -380,7 +438,7 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
 
         {/* Visibility & Missed Opportunities */}
         <div className="mb-12">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">Visibility & Missed Opportunities</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4">{translations.visibilityOpportunities}</h2>
           <p className="text-gray-600 mb-6"> 
             {reportData.visibility_campaign[0].insight}
           </p>
@@ -389,7 +447,7 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
               <div key={campaign.name} className="bg-white p-6 rounded-xl shadow-sm border">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg font-semibold text-gray-900">{campaign.name}</h3>
-                  <span className="text-sm text-gray-500">Total Potential Reach</span>
+                  <span className="text-sm text-gray-500">{translations.totalPotentialReach}</span>
                 </div>
                 <div className="h-8 bg-gray-100 rounded-full overflow-hidden">
                   <div className="flex h-full">
@@ -408,9 +466,9 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
                   </div>
                 </div>
                 <div className="flex justify-between mt-2 text-sm">
-                  <span className="text-blue-600">Captured ({campaign.reachCaptured}%)</span>
-                  <span className="text-yellow-600">Budget Limited ({campaign.reachMissedDueToBudget}%)</span>
-                  <span className="text-red-600">Ranking Limited ({campaign.reachMissedDueToLowRanking}%)</span>
+                  <span className="text-blue-600">{translations.visibility.captured} ({campaign.reachCaptured}%)</span>
+                  <span className="text-yellow-600">{translations.visibility.budgetLimited} ({campaign.reachMissedDueToBudget}%)</span>
+                  <span className="text-red-600">{translations.visibility.rankingLimited} ({campaign.reachMissedDueToLowRanking}%)</span>
                 </div>
               </div>
             ))}
@@ -419,7 +477,7 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
 
         {/* Performance Summary */}
         <div className="mb-12">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-6">Performance Summary</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-6">{translations.performanceSummary}</h2>
           <div className="bg-gray-50 p-6 rounded-xl">
             <div className="flex items-start space-x-3">
               <div className="flex-shrink-0">
@@ -427,17 +485,17 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
                   <BarChart3 className="w-5 h-5 text-indigo-600" />
                 </div>
               </div>
-              <p className="text-gray-700">{reportData.performanceSummary?.allsummary ?? 'No performance summary available'}</p>
+              <p className="text-gray-700">{reportData.performanceSummary?.allsummary ?? translations.noPerformanceSummary}</p>
             </div>
           </div>
         </div>
 
         {/* Strategic Action Plan */}
         <div className="mb-12">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">Strategic Action Plan</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4">{translations.strategicActionPlan}</h2>
           <div className="grid grid-cols-3 gap-6">
             <div className="bg-green-50 p-6 rounded-xl">
-              <h3 className="text-lg font-semibold text-green-700 mb-3">What's Working</h3>
+              <h3 className="text-lg font-semibold text-green-700 mb-3">{translations.actionItems.whatsWorking}</h3>
               <ul className="space-y-2 text-green-600">
                 {(reportData.actionPlan?.whatsWorking || []).map((item, index) => (
                   <li key={index}>• {item}</li>
@@ -445,7 +503,7 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
               </ul>
             </div>
             <div className="bg-yellow-50 p-6 rounded-xl">
-              <h3 className="text-lg font-semibold text-yellow-700 mb-3">What Needs Review</h3>
+              <h3 className="text-lg font-semibold text-yellow-700 mb-3">{translations.actionItems.needsReview}</h3>
               <ul className="space-y-2 text-yellow-600">
                 {(reportData.actionPlan?.needsReview || []).map((item, index) => (
                   <li key={index}>• {item}</li>
@@ -453,7 +511,7 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
               </ul>
             </div>
             <div className="bg-blue-50 p-6 rounded-xl">
-              <h3 className="text-lg font-semibold text-blue-700 mb-3">Next Steps</h3>
+              <h3 className="text-lg font-semibold text-blue-700 mb-3">{translations.actionItems.nextSteps}</h3>
               <ul className="space-y-2 text-blue-600">
                 {(reportData.actionPlan?.nextSteps || []).map((item, index) => (
                   <li key={index}>• {item}</li>
@@ -465,22 +523,22 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
 
         {/* Want to increase revenue? */}
         <div className="text-center pdf-exclude">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Want to increase revenue next month?</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">{translations.increaseRevenue}</h2>
           <div className="flex justify-center space-x-4">
             <button className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors">
-              Book Strategy Session
+              {translations.buttons.bookStrategy}
             </button>
             <button 
               onClick={generatePDF}
               className="bg-gray-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-700 transition-colors"
             >
-              Download as PDF
+              {translations.buttons.downloadPDF}
             </button>
             <button 
               onClick={() => window.location.href = '/'}
               className="bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 transition-colors"
             >
-              Generate Another Report
+              {translations.buttons.generateAnother}
             </button>
           </div>
         </div>
