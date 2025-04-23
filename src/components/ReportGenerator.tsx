@@ -1,4 +1,5 @@
 import React from 'react';
+import { useParams } from 'react-router-dom';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, BarChart, Bar
@@ -64,26 +65,69 @@ interface ReportData {
 }
 
 interface ReportGeneratorProps {
-  data: {
+  data?: {
     output: ReportData;
   };
 }
 
 const COLORS = ['#4F46E5', '#3B82F6', '#60A5FA'];
 
-export function ReportGenerator({ data }: ReportGeneratorProps) {
-  if (!data || !data.output) {
+// Add type for campaign data
+interface Campaign {
+  name: string;
+  spend: number;
+  revenue: number;
+  roas: number;
+  clicks: number;
+  costPerVisitor: number;
+  engagementRate: number;
+  insight: string;
+}
+
+interface VisibilityCampaign {
+  name: string;
+  reachCaptured: number;
+  reachMissedDueToBudget: number;
+  reachMissedDueToLowRanking: number;
+  insight: string;
+}
+
+interface ActionPlanItem {
+  whatsWorking: string[];
+  needsReview: string[];
+  nextSteps: string[];
+}
+
+export function ReportGenerator({ data: propData }: ReportGeneratorProps) {
+  const { reportId } = useParams<{ reportId: string }>();
+
+  // Get report data either from props or from localStorage using reportId
+  const reportData = React.useMemo(() => {
+    if (propData) return propData.output;
+    
+    try {
+      const data = localStorage.getItem(`report_${reportId}`);
+      if (!data) return null;
+      
+      const parsedData = JSON.parse(data);
+      return parsedData.output;
+    } catch (error) {
+      console.error('Error retrieving report data:', error);
+      return null;
+    }
+  }, [propData, reportId]);
+
+  if (!reportData) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <RefreshCw className="w-8 h-8 animate-spin text-indigo-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading report data...</p>
+          <p className="text-gray-600">Report not found or data is invalid.</p>
         </div>
       </div>
     );
   }
 
-  const reportData = data.output;
   const isFrench = reportData.language === 'fr';
 
   const translations = {
@@ -364,7 +408,7 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
-                      data={reportData.campaigns?.map(campaign => ({
+                      data={reportData.campaigns?.map((campaign: Campaign) => ({
                         name: campaign.name,
                         value: campaign.revenue
                       })) || []}
@@ -376,7 +420,7 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
                       dataKey="value"
                       label={({name, percent}) => `${(percent * 100).toFixed(0)}%`}
                     >
-                      {(reportData.campaigns || []).map((entry, index) => (
+                      {(reportData.campaigns || []).map((entry: Campaign, index: number) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
@@ -406,7 +450,7 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
         <div className="mb-12">
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">{translations.campaignPerformance}</h2>
           <div className="space-y-6">
-            {(reportData.campaigns || []).map((campaign) => (
+            {(reportData.campaigns || []).map((campaign: Campaign) => (
               <div key={campaign.name} className="bg-white p-6 rounded-xl shadow-sm border">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">{campaign.name}</h3>
                 <p className="text-sm text-gray-600 mb-4">{campaign.insight}</p>
@@ -448,7 +492,7 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
             {reportData.visibility_campaign[0].insight}
           </p>
           <div className="space-y-6">
-            {(reportData.visibility_campaign || []).map((campaign) => (
+            {(reportData.visibility_campaign || []).map((campaign: VisibilityCampaign) => (
               <div key={campaign.name} className="bg-white p-6 rounded-xl shadow-sm border">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg font-semibold text-gray-900">{campaign.name}</h3>
@@ -502,7 +546,7 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
             <div className="bg-green-50 p-6 rounded-xl">
               <h3 className="text-lg font-semibold text-green-700 mb-3">{translations.actionItems.whatsWorking}</h3>
               <ul className="space-y-2 text-green-600">
-                {(reportData.actionPlan?.whatsWorking || []).map((item, index) => (
+                {(reportData.actionPlan?.whatsWorking || []).map((item: string, index: number) => (
                   <li key={index}>• {item}</li>
                 ))}
               </ul>
@@ -510,7 +554,7 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
             <div className="bg-yellow-50 p-6 rounded-xl">
               <h3 className="text-lg font-semibold text-yellow-700 mb-3">{translations.actionItems.needsReview}</h3>
               <ul className="space-y-2 text-yellow-600">
-                {(reportData.actionPlan?.needsReview || []).map((item, index) => (
+                {(reportData.actionPlan?.needsReview || []).map((item: string, index: number) => (
                   <li key={index}>• {item}</li>
                 ))}
               </ul>
@@ -518,7 +562,7 @@ export function ReportGenerator({ data }: ReportGeneratorProps) {
             <div className="bg-blue-50 p-6 rounded-xl">
               <h3 className="text-lg font-semibold text-blue-700 mb-3">{translations.actionItems.nextSteps}</h3>
               <ul className="space-y-2 text-blue-600">
-                {(reportData.actionPlan?.nextSteps || []).map((item, index) => (
+                {(reportData.actionPlan?.nextSteps || []).map((item: string, index: number) => (
                   <li key={index}>• {item}</li>
                 ))}
               </ul>

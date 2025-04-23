@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { useParams } from 'react-router-dom';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, Legend
@@ -75,6 +76,8 @@ interface WebhookResponse {
 }
 
 export function LeadGenerationReport() {
+  const { reportId } = useParams<{ reportId: string }>();
+
   // Add the styles to the head of the document
   React.useEffect(() => {
     const style = document.createElement('style');
@@ -91,8 +94,27 @@ export function LeadGenerationReport() {
     };
   }, []);
 
-  const reportData = JSON.parse(localStorage.getItem('reportData') || '{}') as WebhookResponse;
+  // Get report data using the reportId
+  const reportData = React.useMemo(() => {
+    try {
+      const data = localStorage.getItem(`report_${reportId}`);
+      return data ? JSON.parse(data) as WebhookResponse : null;
+    } catch (error) {
+      console.error('Error retrieving report data:', error);
+      return null;
+    }
+  }, [reportId]);
+
+  if (!reportData) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p>Report not found or data is invalid.</p>
+      </div>
+    );
+  }
+
   const data = reportData.output;
+  console.log(data.language);
   const isFrench = data.language === 'fr';
 
   const translations = {

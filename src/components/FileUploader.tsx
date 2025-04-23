@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { FileUp, HelpCircle } from 'lucide-react';
 
 interface FileUploaderProps {
@@ -74,6 +74,7 @@ const metricIdToLabel: Record<string, string> = {
 export function FileUploader({ selectedGoal, customMetrics = [], onFileChange }: FileUploaderProps) {
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -95,16 +96,23 @@ export function FileUploader({ selectedGoal, customMetrics = [], onFileChange }:
     }
   };
 
-  const handleFileRemove = () => {
-    setFile(null);
-    onFileChange(null);
-  };
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = event.target.files?.[0];
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
     if (selectedFile?.name.endsWith('.xlsx')) {
       setFile(selectedFile);
       onFileChange(selectedFile);
+    }
+  };
+
+  const handleBrowseClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileRemove = () => {
+    setFile(null);
+    onFileChange(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -121,7 +129,7 @@ export function FileUploader({ selectedGoal, customMetrics = [], onFileChange }:
         <div>
           <h2 className="text-xl font-semibold text-gray-900">Upload Google Ads Export</h2>
           <p className="text-sm text-gray-600 mt-2">
-            Please ensure your export includes these columns:
+            Upload your Google Ads export file to generate a detailed performance report
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             {getRequiredColumns().map((column) => (
@@ -143,13 +151,21 @@ export function FileUploader({ selectedGoal, customMetrics = [], onFileChange }:
         </div>
       </div>
 
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileSelect}
+        accept=".xlsx"
+        className="hidden"
+      />
+
       <div
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         className={`
           border-2 border-dashed rounded-xl p-8 text-center transition-colors
-          ${isDragging ? 'border-indigo-500 bg-indigo-50' : 'border-gray-300 hover:border-gray-400'}
+          ${isDragging ? 'border-indigo-500 bg-indigo-50' : 'border-gray-300'}
         `}
       >
         {file ? (
@@ -169,15 +185,12 @@ export function FileUploader({ selectedGoal, customMetrics = [], onFileChange }:
             <div>
               <p className="text-gray-600">
                 Drag and drop your Excel file here, or{' '}
-                <label className="text-indigo-600 font-medium hover:text-indigo-700 cursor-pointer">
+                <button 
+                  onClick={handleBrowseClick}
+                  className="text-indigo-600 font-medium hover:text-indigo-700"
+                >
                   browse
-                  <input
-                    type="file"
-                    accept=".xlsx"
-                    onChange={handleFileChange}
-                    className="hidden"
-                  />
-                </label>
+                </button>
               </p>
               <p className="text-sm text-gray-500 mt-2">
                 Accepts .xlsx files only
