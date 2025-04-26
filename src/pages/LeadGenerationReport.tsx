@@ -145,7 +145,7 @@ export function LeadGenerationReport() {
       clickPerformance: isFrench ? 'Performance des clics' : 'Click Performance',
       clickPerformanceDesc: isFrench ? 'Montre les clics quotidiens et le taux d\'engagement' : 'Shows daily clicks and engagement rate'
     },
-    campaignPerformance: isFrench ? 'Performance des campagnes' : 'Campaign Performance',
+    campaignPerformance: isFrench ? 'Performance des campagnes' : 'Notable Campaign Performance',
     visibilityBreakdown: isFrench ? 'Répartition de la visibilité' : 'Visibility Breakdown',
     actionItems: {
       keepDoing: isFrench ? 'Continuer à faire' : 'Keep Doing',
@@ -216,6 +216,36 @@ export function LeadGenerationReport() {
       </div>
     );
   }
+
+  const getPerformanceClass = (performance: string) => {
+    switch (performance) {
+      case 'Green':
+        return 'bg-green-100 text-green-800';
+      case 'Yellow':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'Blue':
+        return 'bg-blue-100 text-blue-800';
+      case 'Red':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getPerformanceLabel = (performance: string, isFrench: boolean) => {
+    switch (performance) {
+      case 'Green':
+        return isFrench ? 'Excellent' : 'Excellent';
+      case 'Yellow':
+        return isFrench ? 'Attention' : 'Warning';
+      case 'Blue':
+        return isFrench ? 'Test' : 'Test';
+      case 'Red':
+        return isFrench ? 'Faible' : 'Poor';
+      default:
+        return isFrench ? 'Non évalué' : 'Not rated';
+    }
+  };
 
   return (
     <div>
@@ -434,18 +464,57 @@ export function LeadGenerationReport() {
                           stroke="#6B7280"
                         />
                         <YAxis 
+                          yAxisId="left"
+                          orientation="left"
                           axisLine={false}
                           tickLine={false}
                           stroke="#6B7280"
-                          domain={[0, 'auto']}
+                          domain={[0, 8000]}
+                        />
+                        <YAxis 
+                          yAxisId="right"
+                          orientation="right"
+                          axisLine={false}
+                          tickLine={false}
+                          stroke="#6B7280"
+                          domain={[0, 8]}
+                        />
+                        <Tooltip
+                          content={({ active, payload }) => {
+                            if (active && payload && payload.length) {
+                              const engagementRate = typeof payload[1]?.value === 'number' ? payload[1].value.toFixed(2) : '0.00';
+                              return (
+                                <div className="bg-white p-2 border rounded shadow-sm">
+                                  <p className="text-sm">{payload[0].payload.date}</p>
+                                  <p className="text-sm text-indigo-600">
+                                    {isFrench ? "Clics" : "Clicks"}: {payload[0].value}
+                                  </p>
+                                  <p className="text-sm text-blue-400">
+                                    {isFrench ? "Taux d'engagement" : "Engagement Rate"}: {engagementRate}%
+                                  </p>
+                                </div>
+                              );
+                            }
+                            return null;
+                          }}
                         />
                         <Area
+                          yAxisId="left"
                           type="monotone"
                           dataKey="clicks"
                           stroke="#4F46E5"
-                          fill="#93C5FD"
-                          fillOpacity={0.3}
+                          fill="#4F46E5"
+                          fillOpacity={0.1}
                           name={isFrench ? "Clics" : "Clicks"}
+                        />
+                        <Area
+                          yAxisId="right"
+                          type="monotone"
+                          dataKey="rate"
+                          stroke="#60A5FA"
+                          fill="#60A5FA"
+                          fillOpacity={0.1}
+                          name={isFrench ? "Taux d'engagement %" : "Engagement Rate %"}
                         />
                         <Legend />
                       </AreaChart>
@@ -476,10 +545,8 @@ export function LeadGenerationReport() {
                         <td className="py-4">
                           <div className="flex items-center">
                             <span className="text-gray-900 font-medium">{campaign?.campaignName || (isFrench ? 'Campagne sans nom' : 'Unnamed Campaign')}</span>
-                            <span className={`ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                              campaign?.performance === 'Green' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                            }`}>
-                              {campaign?.performance === 'Green' ? (isFrench ? 'Excellent' : 'Excellent') : (isFrench ? 'Attention' : 'Warning')}
+                            <span className={`ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getPerformanceClass(campaign?.performance)}`}>
+                              {getPerformanceLabel(campaign?.performance, isFrench)}
                             </span>
                           </div>
                           <p className="text-sm text-gray-500 mt-1">{campaign?.insight || (isFrench ? 'Aucune analyse disponible' : 'No insight available')}</p>
@@ -500,49 +567,62 @@ export function LeadGenerationReport() {
             <div className="mb-12">
               <h2 className="text-2xl font-semibold text-gray-900 mb-6">{translations.visibilityBreakdown}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {data.visibility.campaigns.map((campaign, index) => (
-                  <div key={index} className="bg-gray-50 p-6 rounded-lg">
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">{campaign.name}</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span className="text-gray-600">{isFrench ? "Portée capturée" : "Reach Captured"}</span>
-                          <span className="text-gray-900">{campaign.reachCaptured.toFixed(1)}%</span>
+                {data.visibility.campaigns
+                  .filter(campaign => {
+                    // Filter out campaigns with reachCaptured <= 11%
+                    if (campaign.reachCaptured <= 11) return false;
+                    
+                    // Filter out campaigns where all metrics are zero
+                    const allMetricsZero = 
+                      campaign.reachCaptured === 0 && 
+                      campaign.reachMissedBudget === 0 && 
+                      campaign.reachMissedRanking === 0;
+                    
+                    return !allMetricsZero;
+                  })
+                  .map((campaign, index) => (
+                    <div key={index} className="bg-gray-50 p-6 rounded-lg">
+                      <h3 className="text-lg font-medium text-gray-900 mb-4">{campaign.name}</h3>
+                      <div className="space-y-4">
+                        <div>
+                          <div className="flex justify-between text-sm mb-1">
+                            <span className="text-gray-600">{isFrench ? "Portée capturée" : "Reach Captured"}</span>
+                            <span className="text-gray-900">{campaign.reachCaptured.toFixed(1)}%</span>
+                          </div>
+                          <div className="h-2 bg-gray-200 rounded-full">
+                            <div 
+                              className="h-2 bg-green-500 rounded-full" 
+                              style={{ width: `${Math.min(100, campaign.reachCaptured)}%` }}
+                            ></div>
+                          </div>
                         </div>
-                        <div className="h-2 bg-gray-200 rounded-full">
-                          <div 
-                            className="h-2 bg-green-500 rounded-full" 
-                            style={{ width: `${Math.min(100, campaign.reachCaptured)}%` }}
-                          ></div>
+                        <div>
+                          <div className="flex justify-between text-sm mb-1">
+                            <span className="text-gray-600">{isFrench ? "Manqué (Budget)" : "Missed (Budget)"}</span>
+                            <span className="text-gray-900">{campaign.reachMissedBudget.toFixed(1)}%</span>
+                          </div>
+                          <div className="h-2 bg-gray-200 rounded-full">
+                            <div 
+                              className="h-2 bg-yellow-500 rounded-full" 
+                              style={{ width: `${campaign.reachMissedBudget}%` }}
+                            ></div>
+                          </div>
                         </div>
-                      </div>
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span className="text-gray-600">{isFrench ? "Manqué (Budget)" : "Missed (Budget)"}</span>
-                          <span className="text-gray-900">{campaign.reachMissedBudget.toFixed(1)}%</span>
-                        </div>
-                        <div className="h-2 bg-gray-200 rounded-full">
-                          <div 
-                            className="h-2 bg-yellow-500 rounded-full" 
-                            style={{ width: `${campaign.reachMissedBudget}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span className="text-gray-600">{isFrench ? "Manqué (Classement)" : "Missed (Ranking)"}</span>
-                          <span className="text-gray-900">{campaign.reachMissedRanking.toFixed(1)}%</span>
-                        </div>
-                        <div className="h-2 bg-gray-200 rounded-full">
-                          <div 
-                            className="h-2 bg-red-500 rounded-full" 
-                            style={{ width: `${campaign.reachMissedRanking}%` }}
-                          ></div>
+                        <div>
+                          <div className="flex justify-between text-sm mb-1">
+                            <span className="text-gray-600">{isFrench ? "Manqué (Classement)" : "Missed (Ranking)"}</span>
+                            <span className="text-gray-900">{campaign.reachMissedRanking.toFixed(1)}%</span>
+                          </div>
+                          <div className="h-2 bg-gray-200 rounded-full">
+                            <div 
+                              className="h-2 bg-red-500 rounded-full" 
+                              style={{ width: `${campaign.reachMissedRanking}%` }}
+                            ></div>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
               </div>
 
               {/* Action Items */}

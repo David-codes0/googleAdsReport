@@ -62,6 +62,11 @@ interface ReportData {
     engagementRate: number;
     clicks: number;
   }[];
+  pieChartData: {
+    name: string;
+    value: number;
+    percentage: number;
+  }[];
 }
 
 interface ReportGeneratorProps {
@@ -96,6 +101,12 @@ interface ActionPlanItem {
   whatsWorking: string[];
   needsReview: string[];
   nextSteps: string[];
+}
+
+interface PieChartDataItem {
+  name: string;
+  value: number;
+  percentage: number;
 }
 
 export function ReportGenerator({ data: propData }: ReportGeneratorProps) {
@@ -162,7 +173,7 @@ export function ReportGenerator({ data: propData }: ReportGeneratorProps) {
         description: isFrench ? 'Quelle part des revenus provient de chaque campagne.' : 'What share of revenue came from each campaign.'
       }
     },
-    campaignPerformance: isFrench ? 'Performance des Campagnes' : 'Campaign Performance',
+    campaignPerformance: isFrench ? 'Performance des Campagnes' : 'Notable Campaign Performance',
     visibilityOpportunities: isFrench ? 'Visibilité & Opportunités Manquées' : 'Visibility & Missed Opportunities',
     totalPotentialReach: isFrench ? 'Portée Potentielle Totale' : 'Total Potential Reach',
     visibility: {
@@ -174,9 +185,9 @@ export function ReportGenerator({ data: propData }: ReportGeneratorProps) {
     noPerformanceSummary: isFrench ? 'Aucun résumé de performance disponible' : 'No performance summary available',
     strategicActionPlan: isFrench ? 'Plan d\'Action Stratégique' : 'Strategic Action Plan',
     actionItems: {
-      whatsWorking: isFrench ? 'Ce qui Fonctionne' : 'What\'s Working',
-      needsReview: isFrench ? 'Ce qui Nécessite un Examen' : 'What Needs Review',
-      nextSteps: isFrench ? 'Prochaines Étapes' : 'Next Steps'
+      whatsWorking: isFrench ? 'Ce qui fonctionne' : 'What\'s Working',
+      needsReview: isFrench ? 'À améliorer' : 'What Needs Review',
+      nextSteps: isFrench ? 'Prochaines étapes' : 'Next Steps'
     },
     increaseRevenue: isFrench ? 'Voulez-vous augmenter les revenus le mois prochain ?' : 'Want to increase revenue next month?',
     buttons: {
@@ -408,23 +419,22 @@ export function ReportGenerator({ data: propData }: ReportGeneratorProps) {
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
-                      data={reportData.campaigns?.map((campaign: Campaign) => ({
-                        name: campaign.name,
-                        value: campaign.revenue
-                      })) || []}
+                      data={reportData.pieChartData || []}
                       cx="50%"
                       cy="50%"
                       innerRadius={50}
                       outerRadius={80}
                       fill="#8884d8"
                       dataKey="value"
-                      label={({name, percent}) => `${(percent * 100).toFixed(0)}%`}
+                      label={({name, percentage}: PieChartDataItem) => `${percentage.toFixed(0)}%`}
                     >
-                      {(reportData.campaigns || []).map((entry: Campaign, index: number) => (
+                      {(reportData.pieChartData || []).map((entry: PieChartDataItem, index: number) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value) => `€${value.toLocaleString()}`} />
+                    <Tooltip 
+                      formatter={(value, name) => [`€${value.toLocaleString()}`, name]}
+                    />
                     <Legend 
                       verticalAlign="bottom" 
                       height={36}
@@ -492,34 +502,47 @@ export function ReportGenerator({ data: propData }: ReportGeneratorProps) {
             {reportData.visibility_campaign[0].insight}
           </p>
           <div className="space-y-6">
-            {(reportData.visibility_campaign || []).map((campaign: VisibilityCampaign) => (
-              <div key={campaign.name} className="bg-white p-6 rounded-xl shadow-sm border">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">{campaign.name}</h3>
-                  <span className="text-sm text-gray-500">{translations.totalPotentialReach}</span>
-                </div>
-                <div className="h-8 bg-gray-100 rounded-full overflow-hidden">
-                  <div className="flex h-full">
-                    <div 
-                      className="bg-blue-500" 
-                      style={{ width: `${campaign.reachCaptured}%` }}
-                    />
-                    <div 
-                      className="bg-yellow-400" 
-                      style={{ width: `${campaign.reachMissedDueToBudget}%` }}
-                    />
-                    <div 
-                      className="bg-red-400" 
-                      style={{ width: `${campaign.reachMissedDueToLowRanking}%` }}
-                    />
+            {(reportData.visibility_campaign || [])
+              .filter((campaign: VisibilityCampaign) => {
+                // Filter out campaigns with reachCaptured <= 11%
+                if (campaign.reachCaptured <= 11) return false;
+                
+                // Filter out campaigns where all metrics are zero
+                const allMetricsZero = 
+                  campaign.reachCaptured === 0 && 
+                  campaign.reachMissedDueToBudget === 0 && 
+                  campaign.reachMissedDueToLowRanking === 0;
+                
+                return !allMetricsZero;
+              })
+              .map((campaign: VisibilityCampaign) => (
+                <div key={campaign.name} className="bg-white p-6 rounded-xl shadow-sm border">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">{campaign.name}</h3>
+                    <span className="text-sm text-gray-500">{translations.totalPotentialReach}</span>
+                  </div>
+                  <div className="h-8 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="flex h-full">
+                      <div 
+                        className="bg-blue-500" 
+                        style={{ width: `${campaign.reachCaptured}%` }}
+                      />
+                      <div 
+                        className="bg-yellow-400" 
+                        style={{ width: `${campaign.reachMissedDueToBudget}%` }}
+                      />
+                      <div 
+                        className="bg-red-400" 
+                        style={{ width: `${campaign.reachMissedDueToLowRanking}%` }}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex justify-between mt-2 text-sm">
+                    <span className="text-blue-600">{translations.visibility.captured} ({campaign.reachCaptured}%)</span>
+                    <span className="text-yellow-600">{translations.visibility.budgetLimited} ({campaign.reachMissedDueToBudget}%)</span>
+                    <span className="text-red-600">{translations.visibility.rankingLimited} ({campaign.reachMissedDueToLowRanking}%)</span>
                   </div>
                 </div>
-                <div className="flex justify-between mt-2 text-sm">
-                  <span className="text-blue-600">{translations.visibility.captured} ({campaign.reachCaptured}%)</span>
-                  <span className="text-yellow-600">{translations.visibility.budgetLimited} ({campaign.reachMissedDueToBudget}%)</span>
-                  <span className="text-red-600">{translations.visibility.rankingLimited} ({campaign.reachMissedDueToLowRanking}%)</span>
-                </div>
-              </div>
             ))}
           </div>
         </div>

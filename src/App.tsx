@@ -40,6 +40,14 @@ const generateRequestId = () => {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
 };
 
+// Add this near the top with other state declarations
+const loadingMessages = [
+  'Sorting the campaigns',
+  'Analyzing the performances',
+  'Generating results',
+  'Compiling the analysis'
+];
+
 function App() {
   const [selectedGoal, setSelectedGoal] = useState<GoalType>('cpa');
   const [selectedMetrics, setSelectedMetrics] = useState<string[]>([]);
@@ -57,6 +65,18 @@ function App() {
   const [retryCount, setRetryCount] = useState(0);
   const [reportCheckInterval, setReportCheckInterval] = useState<NodeJS.Timeout | null>(null);
   const [isPolling, setIsPolling] = useState(false);
+  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
+
+  // Add this effect to cycle through messages
+  useEffect(() => {
+    if (isGenerating || isPolling) {
+      const interval = setInterval(() => {
+        setCurrentMessageIndex((prev) => (prev + 1) % loadingMessages.length);
+      }, 2000); // Change message every 2 seconds
+
+      return () => clearInterval(interval);
+    }
+  }, [isGenerating, isPolling]);
 
   // Function to parse Excel file
   const parseExcelFile = (file: File): Promise<any> => {
@@ -324,19 +344,14 @@ function App() {
 
                     {(isGenerating || isPolling) && (
                       <div className="w-full mt-6">
-                        <div className="bg-gray-200 rounded-full h-2.5 mb-4">
-                          <div 
-                            className="bg-indigo-600 h-2.5 rounded-full transition-all duration-500" 
-                            style={{ width: `${processingProgress}%` }}
-                          ></div>
+                        <div className="flex items-center justify-center">
+                          <RefreshCw className="w-5 h-5 animate-spin text-indigo-600 mr-2" />
+                          <p className="text-sm text-gray-600">
+                            {loadingMessages[currentMessageIndex]}...
+                          </p>
                         </div>
-                        <p className="text-sm text-gray-600 text-center mt-2">
-                          {isPolling ? 
-                            'We\'re processing your report in the background. This might take a few minutes...' : 
-                            `Analyzing your campaign data... ${processingProgress}%`}
-                        </p>
                         {retryCount > 0 && (
-                          <p className="text-xs text-gray-500 text-center mt-1">
+                          <p className="text-xs text-gray-500 text-center mt-3">
                             Connection retry {retryCount}/3...
                           </p>
                         )}
