@@ -67,6 +67,7 @@ interface ReportData {
     value: number;
     percentage: number;
   }[];
+  logoUrl?: string;
 }
 
 interface ReportGeneratorProps {
@@ -255,7 +256,15 @@ export function ReportGenerator({ data: propData }: ReportGeneratorProps) {
         {/* Report Header */}
         <div className="text-center mb-12">
           <div className="flex justify-center mb-4">
-            <BarChart3 className="w-8 h-8 text-indigo-600" />
+            {reportData.logoUrl ? (
+              <img 
+                src={reportData.logoUrl} 
+                alt="Company Logo" 
+                className="h-20 object-contain"
+              />
+            ) : (
+              <BarChart3 className="w-8 h-8 text-indigo-600" />
+            )}
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">{translations.title}</h1>
           <p className="text-gray-600 mb-1">{translations.subtitle} - {reportData.dateRange}</p>

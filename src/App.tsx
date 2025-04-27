@@ -66,6 +66,7 @@ function App() {
   const [reportCheckInterval, setReportCheckInterval] = useState<NodeJS.Timeout | null>(null);
   const [isPolling, setIsPolling] = useState(false);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
 
   // Add this effect to cycle through messages
   useEffect(() => {
@@ -203,7 +204,8 @@ function App() {
         writingStyle: writingStyle,
         language: language,
         timestamp: Date.now(),
-        reportId: reportId // Include the report ID in the webhook data
+        reportId: reportId, // Include the report ID in the webhook data
+        logoUrl: logoUrl // Include the logo URL in the webhook data
       };
 
       // Attempt to send webhook request
@@ -213,8 +215,16 @@ function App() {
         
         console.log('Webhook response received:', responseData);
         
-        // Store the report data with the unique ID
-        localStorage.setItem(`report_${reportId}`, JSON.stringify(responseData));
+        // Store the report data with the unique ID and logo URL
+        const reportDataWithLogo = {
+          ...responseData,
+          output: {
+            ...responseData.output,
+            logoUrl: logoUrl
+          }
+        };
+        
+        localStorage.setItem(`report_${reportId}`, JSON.stringify(reportDataWithLogo));
         
         // Redirect to the appropriate report URL with the unique ID
         if (selectedGoal === 'cpa') {
@@ -223,7 +233,7 @@ function App() {
           window.location.href = `/revenue-report/${reportId}`;
         }
         
-        setWebhookResponse(responseData);
+        setWebhookResponse(reportDataWithLogo);
         setIsComplete(true);
         setIsGenerating(false);
       } catch (webhookError) {
@@ -296,6 +306,11 @@ function App() {
     }
   };
 
+  // Add handler for logo changes
+  const handleLogoChange = (url: string | null) => {
+    setLogoUrl(url);
+  };
+
   return (
     <Router>
       <Routes>
@@ -335,6 +350,7 @@ function App() {
                     <AIConfig 
                       onLanguageChange={setLanguage}
                       onToneChange={setWritingStyle}
+                      onLogoChange={handleLogoChange}
                     />
               <FileUploader 
                 selectedGoal={selectedGoal} 

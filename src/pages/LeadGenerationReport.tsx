@@ -72,6 +72,7 @@ interface WebhookResponse {
       fixOrReview: string[];
       testOrExplore: string[];
     };
+    logoUrl?: string;
   };
 }
 
@@ -247,6 +248,20 @@ export function LeadGenerationReport() {
     }
   };
 
+  // Add this function to calculate max clicks
+  const getMaxClicks = (clickData: Array<{ clicks: number }>) => {
+    const maxClicks = Math.max(...clickData.map(data => data.clicks));
+    // Round up to the nearest 100 for cleaner scale
+    return Math.ceil(maxClicks / 100) * 100;
+  };
+
+  // Add this function to calculate max engagement rate
+  const getMaxEngagementRate = (clickData: Array<{ rate: number }>) => {
+    const maxRate = Math.max(...clickData.map(data => data.rate));
+    // Round up to the nearest 1 for cleaner scale
+    return Math.ceil(maxRate);
+  };
+
   return (
     <div>
       <div className="max-w-7xl mx-auto px-4">
@@ -254,6 +269,15 @@ export function LeadGenerationReport() {
           {/* Title Section */}
           <div className="bg-[#2563EB] pt-16 pb-32 px-4 rounded-t-lg">
             <div className="max-w-7xl mx-auto text-center text-white">
+              {data.logoUrl && (
+                <div className="flex justify-center mb-8">
+                  <img 
+                    src={data.logoUrl} 
+                    alt="Company Logo" 
+                    className="h-20 object-contain"
+                  />
+                </div>
+              )}
               <h1 className="text-4xl font-bold mb-2">{translations.title}</h1>
               <p className="text-xl mb-2">{data.businessSummary.dateRange}</p>
               <p className="text-lg">{translations.subtitle}</p>
@@ -469,7 +493,7 @@ export function LeadGenerationReport() {
                           axisLine={false}
                           tickLine={false}
                           stroke="#6B7280"
-                          domain={[0, 8000]}
+                          domain={[0, getMaxClicks(data.visualizations.clickData)]}
                         />
                         <YAxis 
                           yAxisId="right"
@@ -477,7 +501,7 @@ export function LeadGenerationReport() {
                           axisLine={false}
                           tickLine={false}
                           stroke="#6B7280"
-                          domain={[0, 8]}
+                          domain={[0, getMaxEngagementRate(data.visualizations.clickData)]}
                         />
                         <Tooltip
                           content={({ active, payload }) => {
